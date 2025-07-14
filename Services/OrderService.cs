@@ -1,44 +1,51 @@
-﻿using ProvaPub.Models;
+﻿using ProvaPub.Contract;
+using ProvaPub.Contract.Base;
+using ProvaPub.Contract.Payment;
+using ProvaPub.Models;
 using ProvaPub.Repository;
+using ProvaPub.Repository.Order;
 
 namespace ProvaPub.Services
 {
-	public class OrderService
+	public class OrderService : Base.ServiceBase<Entity.Order> ,IOrderServiceContract
 	{
-        TestDbContext _ctx;
-
-        public OrderService(TestDbContext ctx)
-        {
-            _ctx = ctx;
-        }
-
-        public async Task<Order> PayOrder(string paymentMethod, decimal paymentValue, int customerId)
+		private readonly IOrderRepository _repository;
+		private readonly IPaymentStrategyFactory _paymentStrategyFactory;
+		public OrderService(IOrderRepository repository, IPaymentStrategyFactory paymentStrategyFactory) : base(repository)
 		{
-			if (paymentMethod == "pix")
-			{
-				//Faz pagamento...
-			}
-			else if (paymentMethod == "creditcard")
-			{
-				//Faz pagamento...
-			}
-			else if (paymentMethod == "paypal")
-			{
-				//Faz pagamento...
-			}
-
-			return await InsertOrder(new Order() //Retorna o pedido para o controller
-            {
-                Value = paymentValue
-            });
-
-
+			_repository = repository;
+			_paymentStrategyFactory = paymentStrategyFactory;
 		}
 
-		public async Task<Order> InsertOrder(Order order)
-        {
-			//Insere pedido no banco de dados
-			return (await _ctx.Orders.AddAsync(order)).Entity;
-        }
+		public async Task<Models.OrderModel> PayOrder(string paymentMethod, decimal paymentValue, int customerId)
+		{
+			var paymentStrategy = _paymentStrategyFactory.GetStrategy(paymentMethod);
+			bool paymentSuccessful = await paymentStrategy.ProcessPayment(paymentValue, customerId);
+
+			if (!paymentSuccessful)
+			{
+				throw new Exception("Falha ao processar pagamento."); // Ou uma exceção mais específica
+			}
+
+			var order = new Entity.Order
+			{
+				Value = paymentValue,
+				CustomerId = customerId,
+				OrderDate = DateTime.UtcNow // <-- SALVANDO COMO UTC AQUI!
+			};
+
+			await _repository.Add(order);
+
+			order.SetDateBrazilCustomization();
+
+			return new OrderModel
+			{
+				Value = order.Value,
+				CustomerId = order.CustomerId,
+				Id = order.Id,
+				OrderDate = order.OrderDate
+			};
+
+		}
 	}
 }

@@ -17,18 +17,18 @@ namespace ProvaPub.Repository
 		{
 			base.OnModelCreating(modelBuilder);
 
-			modelBuilder.Entity<Customer>().HasData(getCustomerSeed());
-			modelBuilder.Entity<Product>().HasData(getProductSeed());
+			modelBuilder.Entity<Entity.Customer>().HasData(getCustomerSeed());
+			modelBuilder.Entity<Entity.Product>().HasData(getProductSeed());
 
-			modelBuilder.Entity<RandomNumber>().HasIndex(s => s.Number).IsUnique();
+			modelBuilder.Entity<Entity.RandomNumber>().HasIndex(s => s.Number).IsUnique();
 		}
 
-		private Customer[] getCustomerSeed()
+		private Entity.Customer[] getCustomerSeed()
 		{
-			List<Customer> result = new();
+			List<Entity.Customer> result = new();
 			for (int i = 0; i < 20; i++)
 			{
-				result.Add(new Customer()
+				result.Add(new Entity.Customer()
 				{
 					 Id = i+1,
 					Name = new Faker().Person.FullName,
@@ -36,12 +36,12 @@ namespace ProvaPub.Repository
 			}
 			return result.ToArray();
 		}
-		private Product[] getProductSeed()
+		private Entity.Product[] getProductSeed()
 		{
-			List<Product> result = new();
+			List<Entity.Product> result = new();
 			for (int i = 0; i < 20; i++)
 			{
-				result.Add(new Product()
+				result.Add(new Entity.Product()
 				{
 					Id = i + 1,
 					Name = new Faker().Commerce.ProductName()
@@ -50,11 +50,11 @@ namespace ProvaPub.Repository
 			return result.ToArray();
 		}
 
-		public DbSet<Customer> Customers{ get; set; }
-		public DbSet<Product> Products{ get; set; }
-		public DbSet<Order> Orders { get; set; }
+		public DbSet<Entity.Customer> Customers{ get; set; }
+		public DbSet<Entity.Product> Products{ get; set; }
+		public DbSet<Entity.Order> Orders { get; set; }
 
-        public DbSet<RandomNumber> Numbers { get; set; }
+        public DbSet<Entity.RandomNumber> Numbers { get; set; }
 
     }
 }

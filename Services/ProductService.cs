@@ -1,21 +1,25 @@
-﻿using ProvaPub.Models;
+﻿using System.Threading.Tasks;
+using ProvaPub.Contract;
+using ProvaPub.Models;
 using ProvaPub.Repository;
+using ProvaPub.Repository.Number;
+using ProvaPub.Repository.Product;
 
 namespace ProvaPub.Services
 {
-	public class ProductService
+	public class ProductService : IProductServiceContract
 	{
-		TestDbContext _ctx;
-
-		public ProductService(TestDbContext ctx)
+		private readonly IProductRepository _repository;
+		public ProductService(IProductRepository repository)
 		{
-			_ctx = ctx;
+			_repository = repository;
 		}
 
-		public ProductList  ListProducts(int page)
+		public async Task<ProductList> ListProducts(int page)
 		{
-			return new ProductList() {  HasNext=false, TotalCount =10, Products = _ctx.Products.ToList() };
-		}
+			var dataReturn = await  _repository.GetPaged(page, 10);
 
+			return new ProductList() { HasNext = false, TotalCount = 10, Products = dataReturn.Items };
+		}
 	}
 }

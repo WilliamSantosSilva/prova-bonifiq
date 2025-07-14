@@ -1,28 +1,37 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ProvaPub.Contract;
 using ProvaPub.Models;
 using ProvaPub.Repository;
+using ProvaPub.Repository.Number;
 
 namespace ProvaPub.Services
 {
-	public class RandomService
+	public class RandomService : IRandomServiceContract
 	{
-		int seed;
-        TestDbContext _ctx;
-		public RandomService()
+        private readonly INumberRepository _repository;
+        private static readonly Random _random = new Random();
+        
+		public RandomService(INumberRepository repository)
         {
-            var contextOptions = new DbContextOptionsBuilder<TestDbContext>()
-    .UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=Teste;Trusted_Connection=True;")
-    .Options;
-            seed = Guid.NewGuid().GetHashCode();
-
-            _ctx = new TestDbContext(contextOptions);
+            _repository = repository;
         }
+        
         public async Task<int> GetRandom()
 		{
-            var number =  new Random(seed).Next(100);
-            _ctx.Numbers.Add(new RandomNumber() { Number = number });
-            _ctx.SaveChanges();
-			return number;
+            try
+            {
+                var number =  new Random(Guid.NewGuid().GetHashCode()).Next(100);
+
+                var _numberEntity = new Entity.RandomNumber(number);
+
+                await _repository.Add(_numberEntity);
+
+                return number;
+            }
+            catch (System.Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }           
 		}
 
 	}

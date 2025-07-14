@@ -9,14 +9,15 @@
     }
   },
   "profiles": {
-    "ProvaPub": {
+    "Local": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:7191;http://localhost:5155",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "SQL_CONN": "Server=(localdb)\\mssqllocaldb;Database=Teste;Trusted_Connection=True;"
       }
     },
     "IIS Express": {

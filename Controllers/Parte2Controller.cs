@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using ProvaPub.Contract;
 using ProvaPub.Models;
 using ProvaPub.Repository;
 using ProvaPub.Services;
@@ -10,6 +12,14 @@ namespace ProvaPub.Controllers
 	[Route("[controller]")]
 	public class Parte2Controller :  ControllerBase
 	{
+		private readonly IProductServiceContract _productServiceContract;
+		private readonly ICustomerServiceContract _customerServiceContract;
+		public Parte2Controller(IProductServiceContract productServiceContract,
+				ICustomerServiceContract customerServiceContract)
+		{
+			_customerServiceContract = customerServiceContract;
+			_productServiceContract = productServiceContract;
+		}
 		/// <summary>
 		/// Precisamos fazer algumas alterações:
 		/// 1 - Não importa qual page é informada, sempre são retornados os mesmos resultados. Faça a correção.
@@ -25,17 +35,15 @@ namespace ProvaPub.Controllers
 		}
 	
 		[HttpGet("products")]
-		public ProductList ListProducts(int page)
+		public async Task<ProductList> ListProducts(int page)
 		{
-			var productService = new ProductService(_ctx);
-			return productService.ListProducts(page);
+			return await _productServiceContract.ListProducts(page);
 		}
 
 		[HttpGet("customers")]
-		public CustomerList ListCustomers(int page)
+		public async Task<CustomerList> ListCustomers(int page)
 		{
-			var customerService = new CustomerService(_ctx);
-			return customerService.ListCustomers(page);
+			return await _customerServiceContract.ListCustomers(page);
 		}
 	}
 }
